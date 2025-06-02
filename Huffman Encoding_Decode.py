@@ -1,19 +1,17 @@
 # Huffman Encoding
 # 31 May 2025
 
-if __name__ == "__main__":
-    pass
-
 class CypherKey:
     def __init__(self, file=None):
         self.freqDict = {}
-        self.fillFreqDict(file)
-        self.keyHead = None
+        self.keyDict = {}
+        self.fillDicts(file)
 
-    def fillFreqDict(self, file):
+    def fillDicts(self, file):
         if self.freqDict == {}:
             for i in range(0,256):
                 self.freqDict[chr(i)] = 0
+                self.keyDict[chr(i)] = ''
             print("Frequencies Initialized")
 
         if file==None:
@@ -26,8 +24,23 @@ class CypherKey:
             self.freqDict[char] += 1
         return print("Frequencies updated")
     
-    def generateKey():
-        pass
+    def generateKey(self):
+        # Initialize priority queue
+        pQueue = PQueue()
+        for entry in self.freqDict:
+            pQueue.insert((entry,self.freqDict[entry]))
+
+        # Start building cypher
+        while len(pQueue.heap)>1:
+            right = pQueue.popMin()
+            left = pQueue.popMin()
+            for chr in right[0]:
+                self.keyDict[chr] = '1' + self.keyDict[chr]
+            for chr in left[0]:
+                self.keyDict[chr] = '0' + self.keyDict[chr]
+
+            # Create new node and insert to pQueue
+            pQueue.insert((left[0]+right[0], left[1]+right[1]))
 
 class PQueue:
     def __init__(self):
@@ -37,11 +50,11 @@ class PQueue:
     def insert(self, node):
         self.heap.append(node)
         i = len(self.heap) - 1
-        while i > 0 and self.heap[(i - 1) // 2][0] > self.heap[i][0]:
+        while i > 0 and self.heap[(i - 1) // 2][1] > self.heap[i][1]:
             self.heap[i], self.heap[(i - 1) // 2] = self.heap[(i - 1) // 2], self.heap[i]
             i = (i - 1) // 2
 
-    """Delete a specific element from the Min Heap."""
+    """Pow the root element from the Min Heap."""
     def popMin(self):
         if self.heap == []:
             return None
@@ -53,9 +66,9 @@ class PQueue:
             left = 2 * i + 1
             right = 2 * i + 2
             smallest = i
-            if left < len(self.heap) and self.heap[left][0] < self.heap[smallest][0]:
+            if left < len(self.heap) and self.heap[left][1] < self.heap[smallest][1]:
                 smallest = left
-            if right < len(self.heap) and self.heap[right][0] < self.heap[smallest][0]:
+            if right < len(self.heap) and self.heap[right][1] < self.heap[smallest][1]:
                 smallest = right
             if smallest != i:
                 self.heap[i], self.heap[smallest] = self.heap[smallest], self.heap[i]
@@ -73,3 +86,12 @@ def encode():
 def decode():
     pass
 
+if __name__ == "__main__":
+    import random
+
+    key = CypherKey()
+    key.generateKey()
+    print(key.freqDict)
+    print('\n')
+    print(key.keyDict)
+    
