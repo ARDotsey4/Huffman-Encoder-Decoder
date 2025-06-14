@@ -4,23 +4,27 @@ class CypherKey:
         self.keyDict = {}
         self.fillDicts(file)
 
+    # Initializes frequency and key dictionaries on object instantiation
     def fillDicts(self, file):
+        # Default initialization
         if self.freqDict == {}:
             for i in range(0,256):
-                self.freqDict[chr(i)] = 0
+                self.freqDict[chr(i)] = .1
                 self.keyDict[chr(i)] = ''
-            print("Frequencies Initialized")
+            print("Cypher Initialized")
 
         if file==None:
             return print("No file found")
         
+        # Read frequencies from file, updates freqDict
         fileHandler = open(file,'r')
         data = fileHandler.read()
         fileHandler.close()
         for char in data:
             self.freqDict[char] += 1
-        return print("Frequencies updated")
+        return print("Frequencies Updated")
     
+    # Builds encryption key from frequencies, updates keyDict
     def generateKey(self):
         # Initialize priority queue
         pQueue = _PQueue()

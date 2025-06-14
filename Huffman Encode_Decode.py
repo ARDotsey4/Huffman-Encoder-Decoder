@@ -1,97 +1,64 @@
 # Huffman Encoding
 # 31 May 2025
 
-class CypherKey:
-    def __init__(self, file=None):
-        self.freqDict = {}
-        self.keyDict = {}
-        self.fillDicts(file)
+import Cypher
 
-    def fillDicts(self, file):
-        if self.freqDict == {}:
-            for i in range(0,256):
-                self.freqDict[chr(i)] = 0
-                self.keyDict[chr(i)] = ''
-            print("Frequencies Initialized")
+def encode(cypher, inFile=None, outFile=None):
+    if inFile == None:
+        return print("Input file required")
 
-        if file==None:
-            return print("No file found")
-        
-        fileHandler = open(file,'r')
-        data = fileHandler.read()
-        fileHandler.close()
-        for char in data:
-            self.freqDict[char] += 1
-        return print("Frequencies updated")
+    inHandler = open(inFile,'r')
+    data = inHandler.read()
+    inHandler.close()
+
+    outHandler = open("encryption.txt" if outFile == None else outFile, 'w')
+    for char in data:
+        outHandler.write(cypher.keyDict[char])
+    outHandler.close()
+    return print("Encryption Complete")
+
+
+def decode(cypher, inFile=None, outFile=None):
+    if inFile==None:
+        return print("Input file required")
     
-    def generateKey(self):
-        # Initialize priority queue
-        pQueue = PQueue()
-        for entry in self.freqDict:
-            pQueue.insert((entry,self.freqDict[entry]))
+    inHandler = open(inFile,'r')
+    data = inHandler.read()
+    inHandler.close()
 
-        # Start building cypher
-        while len(pQueue.heap)>1:
-            right = pQueue.popMin()
-            left = pQueue.popMin()
-            for chr in right[0]:
-                self.keyDict[chr] = '1' + self.keyDict[chr]
-            for chr in left[0]:
-                self.keyDict[chr] = '0' + self.keyDict[chr]
+    if data.count('0') + data.count('1') != len(data):
+        return print("Invalid input data")
 
-            # Create new node and insert to pQueue
-            pQueue.insert((left[0]+right[0], left[1]+right[1]))
+    # Reverse encryption cypher
+    maxRank = 0
+    for char in cypher.keyDict:
+        if len(cypher.keyDict[char]) > maxRank:
+            maxRank = len(cypher.keyDict[char])
 
-class PQueue:
-    def __init__(self):
-        self.heap = []
+    DECYPHERLEN = 2**(maxRank+1) - 1
+    deCypher = [None] * DECYPHERLEN
+    for char in cypher.keyDict:
+        index = 0
+        for bit in cypher.keyDict[char]:
+            index = 2 * index + 1 + int(bit)
+        deCypher[index] = char
 
-    """Insert a new element into the Min Heap."""
-    def insert(self, node):
-        self.heap.append(node)
-        i = len(self.heap) - 1
-        while i > 0 and self.heap[(i - 1) // 2][1] > self.heap[i][1]:
-            self.heap[i], self.heap[(i - 1) // 2] = self.heap[(i - 1) // 2], self.heap[i]
-            i = (i - 1) // 2
+    # Decode input file
+    outHandler = open("decryption.txt" if outFile == None else outFile, 'w')
+    keyIndex = 0
+    for bit in data:
+        keyIndex = 2 * keyIndex + 1 + int(bit)
+        if deCypher[keyIndex] != None:
+            outHandler.write(deCypher[keyIndex])
+            keyIndex = 0
+    outHandler.close()
+    return print("Decryption Complete")
 
-    """Pow the root element from the Min Heap."""
-    def popMin(self):
-        if self.heap == []:
-            return None
-        minNode = self.heap[0]
-        i = 0
-        self.heap[i] = self.heap[-1]
-        self.heap.pop()
-        while True:
-            left = 2 * i + 1
-            right = 2 * i + 2
-            smallest = i
-            if left < len(self.heap) and self.heap[left][1] < self.heap[smallest][1]:
-                smallest = left
-            if right < len(self.heap) and self.heap[right][1] < self.heap[smallest][1]:
-                smallest = right
-            if smallest != i:
-                self.heap[i], self.heap[smallest] = self.heap[smallest], self.heap[i]
-                i = smallest
-            else:
-                break
-        return minNode
-
-    def printHeap(self):
-        print("Min Heap:", self.heap)
-
-def encode():
-    pass
-
-def decode():
-    pass
-
+  
 if __name__ == "__main__":
     import random
 
-    key = CypherKey()
+    key = Cypher.CypherKey("plainMessage.txt")
     key.generateKey()
-    print(key.freqDict)
-    print('\n')
-    print(key.keyDict)
-    
+    encode(key, "plainMessage.txt")
+    decode(key, "encryption.txt")
