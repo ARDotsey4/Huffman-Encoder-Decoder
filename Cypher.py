@@ -2,7 +2,6 @@ class CypherKey:
     def __init__(self, file=None):
         self.freqDict = {}
         self.keyDict = {}
-        self.nodeCount = 0
         self.fillDicts(file)
 
     # Initializes frequency and key dictionaries on object instantiation
@@ -12,7 +11,6 @@ class CypherKey:
             for i in range(0,256):
                 self.freqDict[chr(i)] = .1
                 self.keyDict[chr(i)] = ''
-                self.nodeCount += 1
             print("Cypher Initialized")
 
         if file==None:
@@ -26,7 +24,6 @@ class CypherKey:
             self.freqDict[char] += 1
         return print("Frequencies Updated")
     
-
     # Builds encryption key from frequencies, updates keyDict
     def generateKey(self):
         # Initialize priority queue
@@ -45,8 +42,6 @@ class CypherKey:
 
             # Create new node and insert to pQueue
             pQueue.insert((left[0]+right[0], left[1]+right[1]))
-            self.nodeCount += 1
-
 
 class _PQueue:
     def __init__(self):

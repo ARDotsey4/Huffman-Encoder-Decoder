@@ -54,7 +54,7 @@ def decode(cypher, inFile=None, outFile=None):
     outHandler.close()
     return print("Decryption Complete")
 
-
+  
 if __name__ == "__main__":
     import random
 
